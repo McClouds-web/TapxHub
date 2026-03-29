@@ -161,7 +161,7 @@ const App = () => (
         <AuthProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter basename="/TapxHub">
+          <BrowserRouter basename="/">
             <AppRoutes />
           </BrowserRouter>
         </AuthProvider>
