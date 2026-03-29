@@ -1,0 +1,327 @@
+/* ── TapxMedia brand tokens (must import before @tailwind) ── */
+@import "./styles/tapxmedia-tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    /* Pure White */
+    --foreground: 220 60% 15%;
+    /* Deep Navy #0F1E3D */
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 60% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 60% 15%;
+
+    --primary: 220 60% 15%;
+    /* Deep Navy */
+    --primary-foreground: 0 0% 100%;
+    /* White */
+
+    --secondary: 224 64% 33%;
+    /* Slate Blue #1E3A8A */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 224 64% 33%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 220 60% 15%;
+
+    --radius: 0.5rem;
+
+    /* Glassmorphism Tokens */
+    --glass-bg: 255 255 255 / 0.7;
+    --glass-border: 255 255 255 / 0.5;
+    --glass-shadow: 0 8px 32px 0 rgba(15, 30, 61, 0.08);
+    
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 60% 15%;
+    --sidebar-primary: 220 60% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 220 60% 15%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 220 60% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15,30,61,0.12) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(15,30,61,0.12);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(15,30,61,0.35);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* ── Typography Standardization ── */
+  h1, .h1 {
+    @apply text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#0F1E3D];
+  }
+  h2, .h2 {
+    @apply text-3xl md:text-5xl font-bold tracking-tight text-[#0F1E3D];
+  }
+  h3, .h3 {
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-[#0F1E3D];
+  }
+  p, .p-base {
+    @apply text-base md:text-lg text-[#0F1E3D]/70 font-light leading-relaxed;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground;
+  }
+
+  /* ── Physical Glass System GPU Acceleration ── */
+
+  /* Promotes element to its own GPU compositing layer.
+     Applied to SpatialSection wrappers, glass cards, and light sweeps. */
+  .gpu {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Breathe animation already uses scale ensure GPU compositing */
+  .animate-breathe {
+    will-change: transform, opacity;
+  }
+
+  /* ── prefers-reduced-motion: strip spatial effects for accessibility ── */
+  @media (prefers-reduced-motion: reduce) {
+    .spatial-motion,
+    .glass-shine-mobile {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+
+  /* ── Glassmorphism System ── */
+  .glass-card {
+    background: rgba(var(--glass-bg));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+    @apply rounded-3xl transition-all duration-300;
+  }
+
+  .glass-header {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(15, 30, 61, 0.05);
+    @apply fixed top-0 left-0 right-0 z-50;
+  }
+
+  .blur-bg {
+    @apply pointer-events-none fixed inset-0 z-[-1] overflow-hidden;
+  }
+
+  .green-glow {
+    position: relative;
+  }
+
+  .green-glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #10b981, #10b981, #34d399);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.4;
+    filter: blur(8px);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; filter: blur(8px); }
+  50% { opacity: 0.6; filter: blur(12px); }
+}
+
+/* ── Mobile Glass Auto-Sweep Animation ──────────────────────────────
+   Used on glass cards when scroll-tilt is disabled (mobile).
+   A diagonal light stripe sweeps across the card every 4 seconds,
+   creating a premium studio-reflection feel without scroll processing.
+────────────────────────────────────────────────────────────────────── */
+
+@keyframes glass-shine {
+  0% {
+    transform: translateX(-200%) rotate(-14deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(380%) rotate(-14deg);
+    opacity: 0;
+  }
+}
+
+.glass-shine-mobile {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 40%,
+    rgba(255, 255, 255, 0.32) 50%,
+    rgba(255, 255, 255, 0.22) 60%,
+    transparent 100%
+  );
+  animation: glass-shine 4.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 0.95;
+  }
+}
+
+@layer utilities {
+  .animate-breathe {
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee-reverse 35s linear infinite;
+  }
+
+  .pause {
+    animation-play-state: paused;
+  }
+
+  .mask-marquee {
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+}
+
+/* Force Hide Mobile & Browser Media Artifacts */
+.media-control,
+.media-controls,
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-toggle-closed-captions-button,
+video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  -webkit-appearance: none;
+}
+
+/* Header & Navigation Overrides */
+header,
+nav,
+.fixed.top-4 header {
+  border-bottom: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Footer Strict Overrides */
+footer>div {
+  border-top: none !important;
+  box-shadow: none !important;
+}
+
+footer::before,
+footer::after,
+footer>div::before,
+footer>div::after {
+  display: none !important;
+  content: none !important;
+}
