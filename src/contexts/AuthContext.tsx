@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -38,8 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const defaultRole: UserRole = isOwner ? 'admin' : 'client';
 
         try {
-            // Add a timeout to prevent absolute hangs on network/RLS issues
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 3000));
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 5000));
             
             const profilePromise = supabase
                 .from('profiles')
@@ -49,40 +48,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             const { data: profile, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
-            if (error || !profile) {
-                console.warn('Profile not found or error, creating default...');
-                // Attempt to auto-create, but don't await indefinitely
-                supabase.from('profiles').upsert({
-                    id: supabaseUser.id,
-                    email: supabaseUser.email || userEmail,
-                    full_name: defaultName,
-                    role: defaultRole,
-                }, { onConflict: 'id' }).then(({ error: e }) => {
-                    if (e) console.error('Auto-creation failed:', e);
-                });
-
+            // If profile exists and company_id is present, return it
+            if (!error && profile && profile.company_id) {
                 return {
                     id: supabaseUser.id,
-                    name: defaultName,
+                    name: profile.full_name || defaultName,
                     email: supabaseUser.email || userEmail,
-                    role: defaultRole,
+                    role: isOwner ? 'admin' : (profile.role as UserRole),
+                    company_id: profile.company_id,
                 };
+            }
+
+            // If we're here, we either have no profile, or no company_id (New Client)
+            console.warn('Handling fresh onboarding for:', userEmail);
+
+            let targetCompanyId = profile?.company_id;
+
+            // 1. Create Company if needed (for clients)
+            if (!targetCompanyId && !isOwner) {
+                const workspaceName = `${defaultName}'s Workspace`;
+                const clientToUse = supabaseAdmin || supabase;
+                
+                const { data: newCompany, error: compError } = await clientToUse
+                    .from('companies')
+                    .insert({
+                        name: workspaceName,
+                        contact_email: userEmail,
+                        status: 'Active',
+                        client_type: 'retainer',
+                        onboarding_completed: false
+                    })
+                    .select()
+                    .single();
+                
+                if (compError) {
+                    console.error('Company creation failed:', compError);
+                } else {
+                    targetCompanyId = newCompany.id;
+                    console.log('Created auto-workspace:', targetCompanyId);
+                }
+            }
+
+            // 2. Upsert Profile with linked company_id
+            const profileUpdates = {
+                id: supabaseUser.id,
+                email: userEmail,
+                full_name: defaultName,
+                role: defaultRole,
+                company_id: targetCompanyId,
+            };
+
+            const clientToUse = supabaseAdmin || supabase;
+            const { data: finalProfile, error: upsertError } = await clientToUse
+                .from('profiles')
+                .upsert(profileUpdates, { onConflict: 'id' })
+                .select()
+                .single();
+
+            if (upsertError) {
+                console.error('Profile sync failed:', upsertError);
             }
 
             return {
                 id: supabaseUser.id,
-                name: profile.full_name || defaultName,
-                email: supabaseUser.email || userEmail,
-                role: isOwner ? 'admin' : (profile.role as UserRole),
-                company_id: profile.company_id,
+                name: finalProfile?.full_name || defaultName,
+                email: userEmail,
+                role: isOwner ? 'admin' : (finalProfile?.role as UserRole || defaultRole),
+                company_id: targetCompanyId,
             };
         } catch (e) {
-            console.error('fetchProfile error:', e);
-            // Never return null — always return a usable user object
+            console.error('fetchProfile critical failure:', e);
             return {
                 id: supabaseUser.id,
                 name: defaultName,
-                email: supabaseUser.email || userEmail,
+                email: userEmail,
                 role: defaultRole,
             };
         }
