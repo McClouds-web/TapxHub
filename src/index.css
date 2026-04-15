@@ -1,0 +1,474 @@
+/* ── TapxMedia brand tokens (must import before @tailwind) ── */
+@import "./styles/tapxmedia-tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Soft, airy warm off-white canvas */
+    --background: 210 40% 98%; 
+    
+    /* Deep Navy for high contrast text */
+    --foreground: 220 60% 15%;
+
+    /* Pure white pristine cards */
+    --card: 0 0% 100%;
+    --card-foreground: 220 60% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 60% 15%;
+
+    --primary: 220 60% 15%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 224 64% 33%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 45%;
+
+    --accent: 224 64% 33%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 220 60% 15%;
+
+    --radius: 1rem;
+
+    /* Neo-Morphism Glass Tokens */
+    --glass-bg: 255 255 255 / 0.98;
+    --glass-border: 220 220 230 / 0.4;
+    --glass-shadow: 0 20px 40px -10px rgba(15, 30, 61, 0.06), 0 10px 20px -5px rgba(15, 30, 61, 0.04);
+    
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 60% 15%;
+    --sidebar-primary: 220 60% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 220 60% 15%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 220 60% 15%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15,30,61,0.12) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(15,30,61,0.12);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(15,30,61,0.35);
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* ── Typography Standardization ── */
+  h1, .h1 {
+    @apply text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-[#0F1E3D];
+  }
+  h2, .h2 {
+    @apply text-3xl md:text-5xl font-bold tracking-tight text-[#0F1E3D];
+  }
+  h3, .h3 {
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-[#0F1E3D];
+  }
+  p, .p-base {
+    @apply text-base md:text-lg text-[#0F1E3D]/70 font-light leading-relaxed;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground;
+  }
+
+  /* ── Physical Glass System GPU Acceleration ── */
+
+  /* Promotes element to its own GPU compositing layer.
+     Applied to SpatialSection wrappers, glass cards, and light sweeps. */
+  .gpu {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Breathe animation — GPU compositing hint (class definition lives in @layer utilities below) */
+  .animate-breathe {
+    will-change: transform, opacity;
+    animation: breathe 3s ease-in-out infinite;
+  }
+
+  /* ── prefers-reduced-motion: strip spatial effects for accessibility ── */
+  @media (prefers-reduced-motion: reduce) {
+    .spatial-motion,
+    .glass-shine-mobile {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+
+  /* ── Glassmorphism System ── */
+  .glass-card {
+    background: rgba(var(--glass-bg));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(var(--glass-border));
+    box-shadow: var(--glass-shadow);
+    @apply rounded-3xl transition-all duration-300;
+  }
+
+  .glass-header {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(15, 30, 61, 0.05);
+    @apply fixed top-0 left-0 right-0 z-50;
+  }
+
+  .blur-bg {
+    @apply pointer-events-none fixed inset-0 z-[-1] overflow-hidden;
+  }
+
+  .blue-glow {
+    position: relative;
+  }
+
+  .blue-glow::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #3b82f6, #3b82f6, #34d399);
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.4;
+    filter: blur(8px);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; filter: blur(8px); }
+  50% { opacity: 0.6; filter: blur(12px); }
+}
+
+/* ── Mobile Glass Auto-Sweep Animation ──────────────────────────────
+   Used on glass cards when scroll-tilt is disabled (mobile).
+   A diagonal light stripe sweeps across the card every 4 seconds,
+   creating a premium studio-reflection feel without scroll processing.
+────────────────────────────────────────────────────────────────────── */
+
+@keyframes glass-shine {
+  0% {
+    transform: translateX(-200%) rotate(-14deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(380%) rotate(-14deg);
+    opacity: 0;
+  }
+}
+
+.glass-shine-mobile {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 40%,
+    rgba(255, 255, 255, 0.32) 50%,
+    rgba(255, 255, 255, 0.22) 60%,
+    transparent 100%
+  );
+  animation: glass-shine 4.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin-slow {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 0.95;
+  }
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee-reverse 35s linear infinite;
+  }
+
+  .pause {
+    animation-play-state: paused;
+  }
+
+  .mask-marquee {
+    mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  }
+}
+
+/* Force Hide Mobile & Browser Media Artifacts */
+.media-control,
+.media-controls,
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-toggle-closed-captions-button,
+video::-webkit-media-controls-fullscreen-button {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  -webkit-appearance: none;
+}
+
+/* Header & Navigation Overrides */
+header,
+nav,
+.fixed.top-4 header {
+  border-bottom: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Footer Strict Overrides */
+footer>div {
+  border-top: none !important;
+  box-shadow: none !important;
+}
+
+footer::before,
+footer::after,
+footer>div::before,
+footer>div::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK HUB — Global Override Layer
+   Activated by html.dark class (set by ThemeContext).
+   Overrides hardcoded Tailwind hex classes throughout the app
+   using higher CSS specificity without touching component files.
+══════════════════════════════════════════════════════════════ */
+
+html.dark {
+  color-scheme: dark;
+  /* Global text fallback — catches anything not overridden below */
+  color: #E8EEFF;
+}
+
+/* ── Canvas & body ── */
+html.dark body {
+  background-color: #0A0F1E;
+  color: #E8EEFF;
+}
+
+/* ── Primary background containers ── */
+html.dark .bg-white,
+html.dark [class*="bg-white"] {
+  background-color: #0F1525 !important;
+}
+
+html.dark .bg-\[\#F4F5F7\],
+html.dark .bg-\[\#f4f5f7\],
+html.dark .bg-\[\#F8FAFC\],
+html.dark .bg-\[\#f8fafc\],
+html.dark .bg-\[\#F1F5F9\],
+html.dark .bg-\[\#f1f5f9\],
+html.dark .bg-\[\#EAECEF\],
+html.dark .bg-\[\#eaecef\] {
+  background-color: #0D1628 !important;
+}
+
+/* ── App root canvas gradients ── */
+html.dark .from-\[\#F4F5F7\] { --tw-gradient-from: #0A0F1E !important; }
+html.dark .to-\[\#EAECEF\]   { --tw-gradient-to: #0D1628 !important; }
+
+/* ── Gray/Slate utility backgrounds ── */
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 { background-color: #0F1525 !important; }
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 { background-color: #0F1525 !important; }
+
+/* ── Primary text — ALL opacity variants of #0F1E3D ── */
+html.dark .text-\[\#0F1E3D\]        { color: #E8EEFF !important; }
+html.dark .text-\[\#0F1E3D\]\/10    { color: rgba(232,238,255,0.12) !important; }
+html.dark .text-\[\#0F1E3D\]\/20    { color: rgba(232,238,255,0.22) !important; }
+html.dark .text-\[\#0F1E3D\]\/30    { color: rgba(232,238,255,0.32) !important; }
+html.dark .text-\[\#0F1E3D\]\/40    { color: rgba(232,238,255,0.42) !important; }
+html.dark .text-\[\#0F1E3D\]\/50    { color: rgba(232,238,255,0.52) !important; }
+html.dark .text-\[\#0F1E3D\]\/60    { color: rgba(232,238,255,0.60) !important; }
+html.dark .text-\[\#0F1E3D\]\/70    { color: rgba(232,238,255,0.70) !important; }
+html.dark .text-\[\#0F1E3D\]\/80    { color: rgba(232,238,255,0.80) !important; }
+
+/* brand-primary CSS var text */
+html.dark [class*="text-[var(--brand-primary)]"] { color: #E8EEFF !important; }
+
+/* Tailwind named text colors */
+html.dark .text-gray-900  { color: #E8EEFF !important; }
+html.dark .text-gray-800  { color: #D4DCFF !important; }
+html.dark .text-gray-700  { color: #B4CAFF !important; }
+html.dark .text-gray-600  { color: rgba(180,202,255,0.70) !important; }
+html.dark .text-gray-500  { color: rgba(180,202,255,0.55) !important; }
+html.dark .text-gray-400  { color: rgba(180,202,255,0.45) !important; }
+html.dark .text-gray-300  { color: rgba(180,202,255,0.35) !important; }
+html.dark .text-slate-900 { color: #E8EEFF !important; }
+html.dark .text-slate-700 { color: #B4CAFF !important; }
+html.dark .text-slate-600 { color: rgba(180,202,255,0.65) !important; }
+html.dark .text-slate-500 { color: rgba(180,202,255,0.55) !important; }
+
+/* Foreground token */
+html.dark .text-foreground { color: #E8EEFF !important; }
+
+/* ── Borders ── */
+html.dark .border-white {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .border-\[\#0F1E3D\]\/5,
+html.dark .border-\[\#0F1E3D\]\/10,
+html.dark .border-\[\#0F1E3D\]\/20 {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── Sidebar / Navbar ── */
+html.dark nav,
+html.dark aside {
+  background-color: #0A0F1E !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Inputs & Selects ── */
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #152035 !important;
+  color: #E8EEFF !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder { color: rgba(180, 202, 255, 0.35) !important; }
+
+/* ── Navigation links and icon containers ── */
+html.dark .bg-white\/80,
+html.dark [class*="bg-white\/"] { background-color: rgba(15, 21, 37, 0.85) !important; }
+
+/* ── Hover states on white backgrounds ── */
+html.dark .hover\:bg-\[\#F8FAFC\]:hover { background-color: #162040 !important; }
+html.dark .hover\:bg-gray-50:hover      { background-color: #162040 !important; }
+
+/* ── Topbar ── */
+html.dark header {
+  background-color: #0A0F1E !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ── Scrollbar in dark mode ── */
+html.dark * {
+  scrollbar-color: rgba(79, 142, 255, 0.2) transparent;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(79, 142, 255, 0.2) !important;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(79, 142, 255, 0.4) !important;
+}
+
+/* ── Logo specific overrides ── */
+.logo-img {
+  mix-blend-mode: multiply; /* Kills any lingering white background artifacts */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+html.dark .logo-img {
+  filter: brightness(0) invert(1) !important;
+  mix-blend-mode: screen !important; /* Kills any black background artifacts after inversion */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
