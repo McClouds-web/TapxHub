@@ -53,6 +53,8 @@ import Reports from "./pages/Reports";
 import Bookings from "./pages/Bookings";
 import LeadEngine from "./pages/LeadEngine";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
+import SocialEngine from "./pages/SocialEngine";
+import BrandBrain from "./pages/BrandBrain";
 
 // Client pages
 import ClientPortal from "./pages/ClientPortal";
@@ -61,9 +63,8 @@ import MyInvoices from "./pages/MyInvoices";
 import ClientMessages from "./pages/ClientMessages";
 import ClientReports from "./pages/ClientReports";
 import ServiceModule from "./pages/ServiceModule";
-import SocialEngine from "./pages/SocialEngine";
-import BrandBrain from "./pages/BrandBrain";
 import ResourceLibrary from "./pages/ResourceLibrary";
+import MyServices from "./pages/MyServices";
 
 import Login from "./pages/Login";
 import PublicInvoice from "./pages/PublicInvoice";
@@ -133,9 +134,11 @@ const AppRoutes = () => {
         <Route path="/my-invoices" element={<MyInvoices />} />
         <Route path="/client-messages" element={<ClientMessages />} />
         <Route path="/client-reports" element={<ClientReports />} />
-        <Route path="/services" element={<Navigate to="/client-portal" replace />} />
+        <Route path="/services" element={<MyServices />} />
         <Route path="/services/:id" element={<ServiceModule />} />
         <Route path="/resource-library" element={<ResourceLibrary />} />
+        <Route path="/social-engine" element={<SocialEngine />} />
+        <Route path="/brand-brain" element={<BrandBrain />} />
       </Route>
 
       {/* Public Pages */}
@@ -157,7 +160,6 @@ const AppRoutes = () => {
 };
 
 const App = () => {
-  console.log('App: rendering');
   return (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>

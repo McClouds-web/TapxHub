@@ -358,7 +358,7 @@ export default function ClientPortal() {
                   ? "Analyze high-intent keywords to scale ad spend and optimize conversation rates."
                   : "Complete your Brand Brain questionnaire to unlock the Growth OS engine."}
               </p>
-              <button onClick={() => navigate('/workspace')} className="w-full py-3 bg-[#0F1E3D] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#1E3A8A] transition-all">
+              <button onClick={() => navigate('/brand-brain')} className="w-full py-3 bg-[#0F1E3D] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[#1E3A8A] transition-all">
                  Launch Brand Brain
               </button>
           </div>
